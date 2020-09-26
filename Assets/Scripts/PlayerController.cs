@@ -4,50 +4,37 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    private CharacterController _controller;
-    [SerializeField]
-    private float speed = 20;
-    private float mf;
-    private Vector2 Y;
-    private bool Grounded;
-    private float jumpHeight = 2;
-    private float gravity = -9.6f;
+    public float speed;
+    public float jumpforce;
+    private float moveInput;
+
+    public bool facingRigt = true;
+
+    private Rigidbody2D rb;
 
     private void Start()
     {
-        _controller = GetComponent<CharacterController>();
+        rb = GetComponent<Rigidbody2D>();
     }
-    private void Update()
+    private void FixedUpdate()
     {
-        Grounded = _controller.isGrounded;
-        if(Grounded && Y.y < 0)
+        moveInput = Input.GetAxis("Horizontal");
+        rb.velocity = new Vector2(moveInput * speed, rb.velocity.y);
+
+        if(facingRigt == false && moveInput > 0)
         {
-            Y.y = 0f;
+            Flip();
         }
-
-        Vector2 moveF = new Vector2(mf, 0);
-        _controller.Move(moveF * Time.deltaTime * speed);
-
-        if (Input.GetButtonDown("Jump") && Grounded)
+        else if(facingRigt == true && moveInput < 0)
         {
-            Y.y += Mathf.Sqrt(jumpHeight * -3.0f * gravity);
+            Flip();
         }
-        Y.y += gravity * Time.deltaTime;
-        _controller.Move(Y * Time.deltaTime);
     }
-
-
-
-    public void moveF()
+    private void Flip()
     {
-        mf = 1; 
-    }
-    public void moveB()
-    {
-        mf = -1;
-    }
-    public void stop()
-    {
-        mf = 0;
+        facingRigt = !facingRigt;
+        Vector3 scaler = transform.localScale;
+        scaler.x *= -1;
+        transform.localScale = scaler;
     }
 }
