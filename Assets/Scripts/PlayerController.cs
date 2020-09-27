@@ -25,7 +25,7 @@ public class PlayerController : MonoBehaviour
     {
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, checkRadius, whatisGround);
 
-        moveInput = Input.GetAxis("Horizontal");
+        //moveInput = Input.GetAxis("Horizontal");
         rb.velocity = new Vector2(moveInput * speed, rb.velocity.y);
 
         if(facingRigt == false && moveInput > 0)
@@ -41,17 +41,7 @@ public class PlayerController : MonoBehaviour
     {
         if(isGrounded == true)
         {
-            extraJump = 2;
-        }
-        if (Input.GetKeyDown(KeyCode.Space) && extraJump > 0)
-        {
-            rb.velocity = Vector2.up * jumpforce;
-            extraJump--;
-        }
-        else if (Input.GetKeyDown(KeyCode.Space) && extraJump == 0 && isGrounded == true)
-        {
-            rb.velocity = Vector2.up * jumpforce;
-            
+            extraJump = 1;
         }
     }
     private void Flip()
@@ -60,5 +50,30 @@ public class PlayerController : MonoBehaviour
         Vector3 scaler = transform.localScale;
         scaler.x *= -1;
         transform.localScale = scaler;
+    }
+    public void Jump()
+    {
+        if (extraJump > 0)
+        {
+            rb.velocity = Vector2.up * jumpforce;
+            extraJump--;
+        }
+        else if (extraJump == 0 && isGrounded == true)
+        {
+            rb.velocity = Vector2.up * jumpforce;
+
+        }
+    }
+    public void MF()
+    {
+        moveInput = 1;
+    }
+    public void MB()
+    {
+        moveInput = -1;
+    }
+    public void Stop()
+    {
+        moveInput = 0;
     }
 }
