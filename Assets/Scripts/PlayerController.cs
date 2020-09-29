@@ -4,49 +4,38 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public enum PlayerState
-    {
-        Ideal,
-        Running,
-        Attack
-    }
-    public PlayerState _playerState;
 
     public float speed;
     public float jumpforce;
     private float moveInput;
+    public float attackRange = 0.3f;
+    public float attackRate = 2f;
+    private float nextAttackTime = 0;
+
     public int extraJump;
 
     public bool facingRigt = true;
     public bool isGrounded;
+    public Transform attackPoint;
     public Transform groundCheck;
     public float checkRadius;
     public LayerMask whatisGround;
+    public LayerMask enemyLayers;
     private SpriteRenderer p;
 
     private Rigidbody2D rb;
+    public Animator anim;
 
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        _playerState = PlayerState.Ideal;
         p = GetComponent<SpriteRenderer>();
+        anim = GetComponent<Animator>();
     }
     private void FixedUpdate()
     {
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, checkRadius, whatisGround);
-
-        //moveInput = Input.GetAxis("Horizontal");
-        if(_playerState == PlayerState.Running)
-        {
-            rb.velocity = new Vector2(moveInput * speed, rb.velocity.y);
-            Debug.Log(rb.velocity);
-        }
-        else
-        {
-            rb.velocity = new Vector2(moveInput * 0, rb.velocity.y);
-        }
-        //rb.velocity = new Vector2(moveInput * speed, rb.velocity.y);
+        rb.velocity = new Vector2(moveInput * speed, rb.velocity.y);
 
         if(facingRigt == false && moveInput > 0)
         {
@@ -65,6 +54,43 @@ public class PlayerController : MonoBehaviour
         {
             extraJump = 1;
         }
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            Attack();
+        }
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Jump();
+        }
+        
+    }
+    public void Attack()
+    {
+        anim.SetTrigger("Attack");
+        Collider2D[] hitEnemy = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayers);
+        foreach (Collider2D enemy in hitEnemy)
+        {
+            Debug.Log("Enemy Hit" + enemy.name);
+            CameraShake.Instance.ShakeCamera(1f,0.1f);
+        }
+
+        /*if (Time.time >= nextAttackTime)
+        {
+            anim.SetTrigger("Attack");
+            Collider2D[] hitEnemy = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayers);
+            foreach (Collider2D enemy in hitEnemy)
+            {
+                Debug.Log("Enemy Hit" + enemy.name);
+            }
+        }
+        nextAttackTime = Time.time + 1f / attackRate;*/
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (attackPoint == null)
+            return;
+        Gizmos.DrawWireSphere(attackPoint.position, attackRange);
     }
     private void Flip()
     {
@@ -88,17 +114,14 @@ public class PlayerController : MonoBehaviour
     }
     public void MF()
     {
-        _playerState = PlayerState.Running;
         moveInput = 1;
     }
     public void MB()
     {
-        _playerState = PlayerState.Running;
         moveInput = -1;
     }
     public void Stop()
     {
         moveInput = 0;
-        _playerState = PlayerState.Ideal;
     }
 }
